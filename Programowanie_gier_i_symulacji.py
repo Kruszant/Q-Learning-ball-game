@@ -33,7 +33,7 @@ START_POS = (0, 0)
 CEL_POS = (5, 5)
 
 
-# Konwersja (rząd, kolumna) na pojedynczy indeks (stan)
+# Konwersja (rząd, kolumna) na pojedynczy indeks
 def pos_do_stanu(pos):
     return pos[0] * ROZMIAR_MAPY[1] + pos[1]
 
