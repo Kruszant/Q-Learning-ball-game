@@ -1,0 +1,12 @@
+# Pliki Pythona i IDE
+__pycache__/
+*.pyc
+.ipynb_checkpoints
+
+# Pliki środowiska
+.venv/
+venv/
+
+# Docker i wyniki
+*.png
+*.npy
