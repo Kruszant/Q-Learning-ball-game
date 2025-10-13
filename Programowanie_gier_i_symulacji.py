@@ -9,11 +9,13 @@ import sys
 
 # 0: Wolne pole, 1: Ściana/Przeszkoda, 2: Cel (GOAL)
 MAPA = np.array([
-    [0, 0, 0, 0, 0],
-    [0, 1, 1, 0, 0],
-    [0, 0, 0, 1, 0],
-    [1, 0, 1, 1, 0],
-    [0, 0, 0, 0, 2]
+    [0, 0, 0, 0, 0, 0],
+    [0, 1, 1, 0, 0, 0],
+    [0, 0, 0, 1, 0, 0],
+    [1, 0, 1, 1, 0, 0],
+    [0, 0, 0, 1, 0, 0],
+    [0, 0, 0, 0, 1, 2]
+
 ])
 ROZMIAR_MAPY = MAPA.shape
 NUM_STANOW = ROZMIAR_MAPY[0] * ROZMIAR_MAPY[1]
@@ -28,7 +30,7 @@ AKCJE = {
 NUM_AKCJI = len(AKCJE)
 
 START_POS = (0, 0)
-CEL_POS = (4, 4)
+CEL_POS = (5, 5)
 
 
 # Konwersja (rząd, kolumna) na pojedynczy indeks (stan)
