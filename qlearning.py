@@ -335,7 +335,7 @@ def testuj_agenta():
             break
 
         stan_aktualny = stan_nastepny
-        time.sleep(0.7)  # Trochę wolniej, żeby podziwiać widok
+        time.sleep(0.8)  # Trochę wolniej, żeby podziwiać widok
 
     if stan_aktualny == stan_celu:
         rysuj_scene_izometryczna(stan_do_pos(stan_celu))
