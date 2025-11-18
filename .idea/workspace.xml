@@ -4,7 +4,7 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="157c5ee1-25b5-49ff-ad44-b19748084552" name="Changes" comment="Adding dockerfile and requirements, renaming main file">
+    <list default="true" id="157c5ee1-25b5-49ff-ad44-b19748084552" name="Changes" comment="Adding 3D">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/qlearning.py" beforeDir="false" afterPath="$PROJECT_DIR$/qlearning.py" afterDir="false" />
     </list>
@@ -100,13 +100,22 @@
       <option name="project" value="LOCAL" />
       <updated>1760353570884</updated>
     </task>
-    <option name="localTasksCounter" value="5" />
+    <task id="LOCAL-00005" summary="Adding 3D">
+      <option name="closed" value="true" />
+      <created>1761567530017</created>
+      <option name="number" value="00005" />
+      <option name="presentableId" value="LOCAL-00005" />
+      <option name="project" value="LOCAL" />
+      <updated>1761567530017</updated>
+    </task>
+    <option name="localTasksCounter" value="6" />
     <servers />
   </component>
   <component name="VcsManagerConfiguration">
     <MESSAGE value="first iteration - working projekt" />
     <MESSAGE value="Bigger map" />
     <MESSAGE value="Adding dockerfile and requirements, renaming main file" />
-    <option name="LAST_COMMIT_MESSAGE" value="Adding dockerfile and requirements, renaming main file" />
+    <MESSAGE value="Adding 3D" />
+    <option name="LAST_COMMIT_MESSAGE" value="Adding 3D" />
   </component>
 </project>
