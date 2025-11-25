@@ -4,7 +4,7 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="157c5ee1-25b5-49ff-ad44-b19748084552" name="Changes" comment="Adding 3D">
+    <list default="true" id="157c5ee1-25b5-49ff-ad44-b19748084552" name="Changes" comment="Isometric map view">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/qlearning.py" beforeDir="false" afterPath="$PROJECT_DIR$/qlearning.py" afterDir="false" />
     </list>
@@ -108,7 +108,23 @@
       <option name="project" value="LOCAL" />
       <updated>1761567530017</updated>
     </task>
-    <option name="localTasksCounter" value="6" />
+    <task id="LOCAL-00006" summary="Isometric map view">
+      <option name="closed" value="true" />
+      <created>1763466110420</created>
+      <option name="number" value="00006" />
+      <option name="presentableId" value="LOCAL-00006" />
+      <option name="project" value="LOCAL" />
+      <updated>1763466110420</updated>
+    </task>
+    <task id="LOCAL-00007" summary="Isometric map view">
+      <option name="closed" value="true" />
+      <created>1763466154559</created>
+      <option name="number" value="00007" />
+      <option name="presentableId" value="LOCAL-00007" />
+      <option name="project" value="LOCAL" />
+      <updated>1763466154559</updated>
+    </task>
+    <option name="localTasksCounter" value="8" />
     <servers />
   </component>
   <component name="VcsManagerConfiguration">
@@ -116,6 +132,7 @@
     <MESSAGE value="Bigger map" />
     <MESSAGE value="Adding dockerfile and requirements, renaming main file" />
     <MESSAGE value="Adding 3D" />
-    <option name="LAST_COMMIT_MESSAGE" value="Adding 3D" />
+    <MESSAGE value="Isometric map view" />
+    <option name="LAST_COMMIT_MESSAGE" value="Isometric map view" />
   </component>
 </project>
