@@ -3,17 +3,16 @@ import pygame
 import time
 import sys
 import os
-from collections import deque  # Potrzebne do sprawdzania ścieżki (BFS)
+from collections import deque
 
 # ====================================================================
-# A. KONFIGURACJA ŚRODOWISKA I GENERATOR MAPY (3D)
+# A. LOGIKA I MAPA (Generator losowy)
 # ====================================================================
 
 WYMIARY = (3, 6, 6)  # (Warstwy, Rzędy, Kolumny)
 START_POS = (0, 0, 0)
 CEL_POS = (2, 5, 5)
 
-# (0: Góra, 1: Dół, 2: Lewo, 3: Prawo, 4: Wznieś się, 5: Opadnij)
 AKCJE = {
     0: (0, -1, 0),
     1: (0, 1, 0),
@@ -26,71 +25,42 @@ NUM_AKCJI = len(AKCJE)
 
 
 def sprawdz_czy_sciezka_istnieje(mapa_testowa):
-    """
-    Używa algorytmu BFS (Breadth-First Search) żeby sprawdzić,
-    czy istnieje fizyczne przejście od START do CEL.
-    """
     kolejka = deque([START_POS])
     odwiedzone = set([START_POS])
-
-    # Cel w formacie tablicy (z, r, c)
     target = CEL_POS
 
     while kolejka:
         z, r, c = kolejka.popleft()
-
-        if (z, r, c) == target:
-            return True  # Znaleziono drogę!
-
-        # Sprawdź wszystkich sąsiadów (6 kierunków)
+        if (z, r, c) == target: return True
         for _, (dz, dr, dc) in AKCJE.items():
             nz, nr, nc = z + dz, r + dr, c + dc
-
-            # Sprawdzenie granic
-            if (0 <= nz < WYMIARY[0] and
-                    0 <= nr < WYMIARY[1] and
-                    0 <= nc < WYMIARY[2]):
-
-                # Jeśli nie jest ścianą (1) i nie był odwiedzony
+            if (0 <= nz < WYMIARY[0] and 0 <= nr < WYMIARY[1] and 0 <= nc < WYMIARY[2]):
                 if mapa_testowa[nz, nr, nc] != 1 and (nz, nr, nc) not in odwiedzone:
                     odwiedzone.add((nz, nr, nc))
                     kolejka.append((nz, nr, nc))
-
-    return False  # Kolejka pusta, brak drogi
+    return False
 
 
 def generuj_losowa_mape():
-    """Generuje losową mapę tak długo, aż znajdzie taką z rozwiązaniem."""
     próba = 0
     while True:
         próba += 1
-        # 1. Tworzymy pustą macierz 3D
-        # Szansa na ścianę to np. 25% (p=[0.75, 0.25])
         nowa_mapa = np.random.choice([0, 1], size=WYMIARY, p=[0.75, 0.25])
-
-        # 2. Czyścimy Start i Cel (muszą być dostępne)
         nowa_mapa[START_POS] = 0
-        nowa_mapa[CEL_POS] = 2  # Oznaczamy cel jako 2
-
-        # 3. Sprawdzamy czy da się przejść
+        nowa_mapa[CEL_POS] = 2
         if sprawdz_czy_sciezka_istnieje(nowa_mapa):
             print(f"Wygenerowano poprawną mapę w {próba}. próbie.")
             return nowa_mapa
 
 
-# === INICJALIZACJA MAPY ===
 MAPA = generuj_losowa_mape()
 ROZMIAR_MAPY = MAPA.shape
 NUM_STANOW = ROZMIAR_MAPY[0] * ROZMIAR_MAPY[1] * ROZMIAR_MAPY[2]
 
 
-# --- Pozostałe funkcje pomocnicze (bez zmian) ---
-
 def pos_do_stanu(pos):
     z, r, c = pos
-    indeks_warstwy = ROZMIAR_MAPY[1] * ROZMIAR_MAPY[2]
-    indeks_rzedu = ROZMIAR_MAPY[2]
-    return z * indeks_warstwy + r * indeks_rzedu + c
+    return z * (ROZMIAR_MAPY[1] * ROZMIAR_MAPY[2]) + r * ROZMIAR_MAPY[2] + c
 
 
 def stan_do_pos(stan):
@@ -106,28 +76,31 @@ def pobierz_nagrode(pos):
     z, r, c = pos
     val = MAPA[z, r, c]
     if val == 2:
-        return 100  # Cel
+        return 100
     elif val == 1:
-        return -10  # Ściana
+        return -10
     else:
-        return -1  # Puste pole (koszt ruchu)
+        return -1
 
 
 def nastepny_stan(stan_startowy, akcja):
     z_start, r_start, c_start = stan_do_pos(stan_startowy)
+
+    # --- USUNIĘTO ZASADĘ O OGRANICZENIU WZNOSZENIA ---
+    # Agent porusza się standardowo, ogranicza go tylko fizyka (ściany/granice mapy)
+
     dz, dr, dc = AKCJE[akcja]
     z_nowy, r_nowy, c_nowy = z_start + dz, r_start + dr, c_start + dc
 
     if (0 <= z_nowy < ROZMIAR_MAPY[0] and
             0 <= r_nowy < ROZMIAR_MAPY[1] and
             0 <= c_nowy < ROZMIAR_MAPY[2]):
-
         pos_nowa = (z_nowy, r_nowy, c_nowy)
-        if MAPA[z_nowy, r_nowy, c_nowy] == 1:  # Uderzenie w ścianę
+        if MAPA[z_nowy, r_nowy, c_nowy] == 1:
             return stan_startowy, pobierz_nagrode(pos_nowa)
         return pos_do_stanu(pos_nowa), pobierz_nagrode(pos_nowa)
     else:
-        return stan_startowy, -1  # Wyjście poza mapę
+        return stan_startowy, -1
 
 
 # ====================================================================
@@ -154,142 +127,112 @@ def trenuj_agenta():
     global Q_TABLE
     epsilon = EPSILON_POCZATKOWY
     stan_celu = pos_do_stanu(CEL_POS)
-
     print(f"--- START TRENINGU ({LICZBA_EPIZODOW} epizodów) ---")
-
     for epizod in range(LICZBA_EPIZODOW):
         stan_aktualny = pos_do_stanu(START_POS)
         epsilon = max(0.01, epsilon * EPSILON_DECAY)
         kroki = 0
-
-        # Pętla jednego epizodu
-        while stan_aktualny != stan_celu and kroki < 200:  # Limit kroków per epizod
+        while stan_aktualny != stan_celu and kroki < 200:
             kroki += 1
             akcja = wybierz_akcje(stan_aktualny, epsilon)
             stan_nastepny, nagroda = nastepny_stan(stan_aktualny, akcja)
-
             max_q_nastepny = np.max(Q_TABLE[stan_nastepny, :])
-            q_nowy = (1 - ALFA) * Q_TABLE[stan_aktualny, akcja] + \
-                     ALFA * (nagroda + GAMMA * max_q_nastepny)
-
-            Q_TABLE[stan_aktualny, akcja] = q_nowy
+            Q_TABLE[stan_aktualny, akcja] = (1 - ALFA) * Q_TABLE[stan_aktualny, akcja] + \
+                                            ALFA * (nagroda + GAMMA * max_q_nastepny)
             stan_aktualny = stan_nastepny
-
-        if epizod % 5000 == 0:
-            print(f"Epizod {epizod}: Epsilon={epsilon:.4f}")
-
+        if epizod % 5000 == 0: print(f"Epizod {epizod}: Epsilon={epsilon:.4f}")
     print("--- TRENING ZAKOŃCZONY ---")
 
 
 # ====================================================================
-# C. WIZUALIZACJA IZOMETRYCZNA (PSEUDO-3D)
+# C. WIZUALIZACJA "PANELOWA" (SIDE-BY-SIDE)
 # ====================================================================
 
-TILE_WIDTH = 60
-TILE_HEIGHT = 30
-WALL_HEIGHT = 40
-LAYER_GAP = 120
+TILE_SIZE = 60
+MARGIN = 20
+PANEL_GAP = 50
 
-SZEROKOSC_OKNA = 1000
-WYSOKOSC_OKNA = 800
+SZEROKOSC_PANELU = ROZMIAR_MAPY[2] * TILE_SIZE
+WYSOKOSC_PANELU = ROZMIAR_MAPY[1] * TILE_SIZE
 
-# Kolory
-BG_COLOR = (20, 20, 30)
-C_FLOOR = (150, 150, 150)
-C_WALL_TOP = (200, 100, 100)
-C_WALL_SIDE_L = (150, 50, 50)
-C_WALL_SIDE_R = (100, 30, 30)
+SZEROKOSC_OKNA = (3 * SZEROKOSC_PANELU) + (2 * PANEL_GAP) + (2 * MARGIN)
+WYSOKOSC_OKNA = WYSOKOSC_PANELU + 150
+
+BG_COLOR = (30, 30, 30)
+C_GRID = (50, 50, 50)
+C_WALL = (80, 80, 80)
+C_FREE = (200, 200, 200)
 C_START = (50, 50, 200)
 C_GOAL = (50, 200, 50)
-C_AGENT = (255, 215, 0)
-C_TEXT = (255, 255, 255)
+C_AGENT = (255, 100, 0)
+C_ACTIVE_BORDER = (255, 255, 0)
+C_INACTIVE_OVERLAY = (0, 0, 0, 150)
 
 os.environ['SDL_AUDIODRIVER'] = 'dsp'
 pygame.init()
 pygame.font.init()
-FONT = pygame.font.SysFont('Arial', 16)
-FONT_BIG = pygame.font.SysFont('Arial', 24)
+FONT = pygame.font.SysFont('Arial', 20)
+FONT_BIG = pygame.font.SysFont('Arial', 28, bold=True)
 
 EKRAN = pygame.display.set_mode((SZEROKOSC_OKNA, WYSOKOSC_OKNA))
-pygame.display.set_caption("3D Drone Navigation - Random Maps")
+pygame.display.set_caption("3D Drone Navigation - Split View (Slower)")
 
 
-def konwertuj_iso(x, y, z):
-    start_x = SZEROKOSC_OKNA // 2
-    start_y = 150
-    iso_x = (x - y) * TILE_WIDTH
-    iso_y = (x + y) * TILE_HEIGHT
-    screen_x = start_x + iso_x
-    screen_y = start_y + iso_y + (z * LAYER_GAP)
-    return screen_x, screen_y
+def rysuj_panel(z_index, offset_x, offset_y, czy_aktywne, agent_pos_local):
+    """Rysuje pojedyncze piętro (grid 2D) w zadanej pozycji"""
+
+    tytul = f"PIĘTRO {z_index}"
+    kolor_tekstu = (255, 255, 255) if czy_aktywne else (100, 100, 100)
+    img_tekst = FONT_BIG.render(tytul, True, kolor_tekstu)
+    text_rect = img_tekst.get_rect(center=(offset_x + SZEROKOSC_PANELU // 2, offset_y - 30))
+    EKRAN.blit(img_tekst, text_rect)
+
+    rect_panel = pygame.Rect(offset_x - 5, offset_y - 5, SZEROKOSC_PANELU + 10, WYSOKOSC_PANELU + 10)
+    kolor_ramki = C_ACTIVE_BORDER if czy_aktywne else (50, 50, 50)
+    pygame.draw.rect(EKRAN, kolor_ramki, rect_panel, 3)
+
+    for r in range(ROZMIAR_MAPY[1]):
+        for c in range(ROZMIAR_MAPY[2]):
+            x = offset_x + c * TILE_SIZE
+            y = offset_y + r * TILE_SIZE
+            rect = pygame.Rect(x, y, TILE_SIZE, TILE_SIZE)
+
+            typ_pola = MAPA[z_index, r, c]
+
+            if typ_pola == 1:
+                kolor = C_WALL
+            elif (z_index, r, c) == START_POS:
+                kolor = C_START
+            elif (z_index, r, c) == CEL_POS:
+                kolor = C_GOAL
+            else:
+                kolor = C_FREE
+
+            pygame.draw.rect(EKRAN, kolor, rect)
+            pygame.draw.rect(EKRAN, C_GRID, rect, 1)
+
+            if czy_aktywne and (r, c) == agent_pos_local:
+                pygame.draw.circle(EKRAN, C_AGENT, rect.center, TILE_SIZE // 2.5)
+                pygame.draw.circle(EKRAN, (255, 255, 255), (rect.centerx - 5, rect.centery - 5), 5)
+
+    if not czy_aktywne:
+        s = pygame.Surface((SZEROKOSC_PANELU, WYSOKOSC_PANELU), pygame.SRCALPHA)
+        s.fill(C_INACTIVE_OVERLAY)
+        EKRAN.blit(s, (offset_x, offset_y))
 
 
-def rysuj_szescian(x, y, z, kolor_top, h=WALL_HEIGHT):
-    px, py = konwertuj_iso(x, y, z)
-    p_top = (px, py - h)
-    p_right = (px + TILE_WIDTH, py + TILE_HEIGHT - h)
-    p_bottom = (px, py + 2 * TILE_HEIGHT - h)
-    p_left = (px - TILE_WIDTH, py + TILE_HEIGHT - h)
-    p_base_bottom = (px, py + 2 * TILE_HEIGHT)
-    p_base_right = (px + TILE_WIDTH, py + TILE_HEIGHT)
-    p_base_left = (px - TILE_WIDTH, py + TILE_HEIGHT)
-
-    pygame.draw.polygon(EKRAN, C_WALL_SIDE_R, [p_right, p_bottom, p_base_bottom, p_base_right])
-    pygame.draw.polygon(EKRAN, C_WALL_SIDE_L, [p_left, p_bottom, p_base_bottom, p_base_left])
-    pygame.draw.polygon(EKRAN, kolor_top, [p_top, p_right, p_bottom, p_left])
-    pygame.draw.polygon(EKRAN, (0, 0, 0), [p_top, p_right, p_bottom, p_left], 1)
-
-
-def rysuj_plytke(x, y, z, kolor):
-    px, py = konwertuj_iso(x, y, z)
-    points = [
-        (px, py),
-        (px + TILE_WIDTH, py + TILE_HEIGHT),
-        (px, py + 2 * TILE_HEIGHT),
-        (px - TILE_WIDTH, py + TILE_HEIGHT)
-    ]
-    pygame.draw.polygon(EKRAN, kolor, points)
-    pygame.draw.polygon(EKRAN, (50, 50, 50), points, 1)
-
-
-def rysuj_agenta(x, y, z):
-    px, py = konwertuj_iso(x, y, z)
-    center = (px, int(py + TILE_HEIGHT - 20))
-    shadow_points = [
-        (px, py + TILE_HEIGHT + 5),
-        (px + 10, py + TILE_HEIGHT + 10),
-        (px, py + TILE_HEIGHT + 15),
-        (px - 10, py + TILE_HEIGHT + 10)
-    ]
-    pygame.draw.polygon(EKRAN, (0, 0, 0), shadow_points)
-    pygame.draw.circle(EKRAN, C_AGENT, center, 12)
-    pygame.draw.circle(EKRAN, (255, 255, 255), (center[0] - 4, center[1] - 4), 4)
-
-
-def rysuj_scene_izometryczna(agent_pos):
+def rysuj_scene_panelowa(agent_pos):
     EKRAN.fill(BG_COLOR)
 
-    tekst = FONT_BIG.render(f"Agent: {agent_pos} | CEL: {CEL_POS}", True, C_TEXT)
-    EKRAN.blit(tekst, (20, 20))
-    EKRAN.blit(FONT.render("Piętro 0", True, C_TEXT), (SZEROKOSC_OKNA - 150, 50))
-    EKRAN.blit(FONT.render("Piętro 1", True, C_TEXT), (SZEROKOSC_OKNA - 150, 50 + LAYER_GAP))
-    EKRAN.blit(FONT.render("Piętro 2", True, C_TEXT), (SZEROKOSC_OKNA - 150, 50 + LAYER_GAP * 2))
+    agent_z, agent_r, agent_c = agent_pos
+    info = f"Pozycja: (P:{agent_z}, R:{agent_r}, K:{agent_c}) | Cel: {CEL_POS}"
+    EKRAN.blit(FONT.render(info, True, (200, 200, 200)), (20, WYSOKOSC_OKNA - 40))
 
     for z in range(ROZMIAR_MAPY[0]):
-        for r in range(ROZMIAR_MAPY[1]):
-            for c in range(ROZMIAR_MAPY[2]):
-                typ_pola = MAPA[z, r, c]
-                kolor = C_FLOOR
-                if (z, r, c) == START_POS:
-                    kolor = C_START
-                elif (z, r, c) == CEL_POS:
-                    kolor = C_GOAL
-
-                rysuj_plytke(c, r, z, kolor)
-                if typ_pola == 1:
-                    rysuj_szescian(c, r, z, C_WALL_TOP)
-                if (z, r, c) == agent_pos:
-                    rysuj_agenta(c, r, z)
+        offset_x = MARGIN + (z * (SZEROKOSC_PANELU + PANEL_GAP))
+        offset_y = 80
+        czy_aktywne = (z == agent_z)
+        rysuj_panel(z, offset_x, offset_y, czy_aktywne, (agent_r, agent_c))
 
     pygame.display.flip()
 
@@ -298,7 +241,7 @@ def testuj_agenta():
     stan_aktualny = pos_do_stanu(START_POS)
     stan_celu = pos_do_stanu(CEL_POS)
 
-    print("\n--- Tryb Testowy ---")
+    print("\n--- Tryb Testowy (Wolniejszy) ---")
 
     running = True
     while running and stan_aktualny != stan_celu:
@@ -308,26 +251,27 @@ def testuj_agenta():
                 sys.exit()
 
         pos_3d = stan_do_pos(stan_aktualny)
-        rysuj_scene_izometryczna(pos_3d)
+        rysuj_scene_panelowa(pos_3d)
 
         akcja_optymalna = np.argmax(Q_TABLE[stan_aktualny, :])
         stan_nastepny, _ = nastepny_stan(stan_aktualny, akcja_optymalna)
 
-        if stan_nastepny == stan_aktualny:
-            # Mała szansa, że agent wybierze ścianę w początkowych fazach nauki
-            # lub jeśli algorytm nie zbiegł idealnie
-            pass
-
         stan_aktualny = stan_nastepny
-        time.sleep(0.3)
+
+        # --- ZMIANA: Spowolnienie do 0.8 sekundy na ruch ---
+        time.sleep(0.6)
 
     if stan_aktualny == stan_celu:
-        rysuj_scene_izometryczna(stan_do_pos(stan_celu))
-        print("SUKCES: Dron dotarł do celu!")
+        rysuj_scene_panelowa(stan_do_pos(stan_celu))
+        print("SUKCES!")
         time.sleep(3)
 
     pygame.quit()
 
+
+# ====================================================================
+# D. URUCHOMIENIE
+# ====================================================================
 
 if __name__ == "__main__":
     trenuj_agenta()
