@@ -4,7 +4,7 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="157c5ee1-25b5-49ff-ad44-b19748084552" name="Changes" comment="Ramdom map">
+    <list default="true" id="157c5ee1-25b5-49ff-ad44-b19748084552" name="Changes" comment="code optimalization and changed map view">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/qlearning.py" beforeDir="false" afterPath="$PROJECT_DIR$/qlearning.py" afterDir="false" />
     </list>
@@ -21,6 +21,11 @@
     </option>
   </component>
   <component name="Git.Settings">
+    <option name="RECENT_BRANCH_BY_REPOSITORY">
+      <map>
+        <entry key="$PROJECT_DIR$" value="master" />
+      </map>
+    </option>
     <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$" />
   </component>
   <component name="GitHubPullRequestSearchHistory">{
@@ -50,7 +55,7 @@
     "Python.qlearning.executor": "Run",
     "RunOnceActivity.ShowReadmeOnStart": "true",
     "RunOnceActivity.git.unshallow": "true",
-    "git-widget-placeholder": "master"
+    "git-widget-placeholder": "Enhanced-Training-&&-Analysis"
   }
 }]]></component>
   <component name="SharedIndexes">
@@ -132,7 +137,15 @@
       <option name="project" value="LOCAL" />
       <updated>1764071961976</updated>
     </task>
-    <option name="localTasksCounter" value="9" />
+    <task id="LOCAL-00009" summary="code optimalization and changed map view">
+      <option name="closed" value="true" />
+      <created>1764072448077</created>
+      <option name="number" value="00009" />
+      <option name="presentableId" value="LOCAL-00009" />
+      <option name="project" value="LOCAL" />
+      <updated>1764072448077</updated>
+    </task>
+    <option name="localTasksCounter" value="10" />
     <servers />
   </component>
   <component name="VcsManagerConfiguration">
@@ -142,6 +155,7 @@
     <MESSAGE value="Adding 3D" />
     <MESSAGE value="Isometric map view" />
     <MESSAGE value="Ramdom map" />
-    <option name="LAST_COMMIT_MESSAGE" value="Ramdom map" />
+    <MESSAGE value="code optimalization and changed map view" />
+    <option name="LAST_COMMIT_MESSAGE" value="code optimalization and changed map view" />
   </component>
 </project>
